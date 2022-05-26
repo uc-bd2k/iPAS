@@ -1,0 +1,110 @@
+---
+title: "iPAS vignette"
+output: html_document
+---
+
+This is a simple introduction to the iPAS R package. This package performs
+pathway enrichment for differential expression data (RNA-seq, microarray, etc.).
+iPAS stands for integrative Pathway Activity Signatures, our method for
+constructing "signatures" of transcriptional response to signaling pathway
+perturbation using L1000 microarray data from the NIH LINCS project.
+The signatures are "integrative" in that they integrate cellular response across
+a diverse set of cell lines used in LINCS.
+
+This vignette will show how the package works and how to perform simple pathway
+enrichment and create plots to analyze the output.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Loading the package
+
+```{r load_iPAS, echo=FALSE}
+library(iPAS)
+```
+
+### Loading example RNA-seq differntial expression data
+
+First load the example RNA-seq data. The data originally came from
+differential expression signatures created from a gene silencing experiment. The
+genes have been shuffled as the data has not yet been published.
+
+The format of the data is a matrix where the rownames are entrez IDs of the
+genes and the column names are the names of each sample or experiment. The
+numbers represent log2-transformed fold-change of counts per transcript (FPKM - Fragments Per Kilobase Million) from control to treated samples.
+
+```{r load_example_data, echo=FALSE}
+data("rnaseq_input_rand")
+head(rnaseq_input_rand)
+```
+
+### Pathway enrichment with iPAS
+
+The *iPAS_enrich* function performs pathway enrichment for each sample
+(this may take a few minutes). The function scores the differential
+expression from the input sample by its similarity to the iPAS signature for 
+each pathway. By default, we use Pearson correlation for the similarity, but 
+cosine similarity and the dot product between the two are given as options.
+
+The significance of the pathway score is established via a permutation test.
+We permute the input signature *n* times (n=1000 by default) and calculate a
+null distribution of *n* pathway scores. We use the null distribution of scores
+to calculate an empirical p-value and a z-score.
+
+Here we set the number of permutations to 100 to run the example quickly.
+
+```{r echo=F}
+res = iPAS_enrich(query = rnaseq_input_rand,
+                  gene_type = "entrez",
+                  similarity = "Pearson",
+                  perm = 100,
+                  category = "Signaling",
+                  return_null_dist = TRUE
+    )
+```
+
+
+### Review results
+
+You may view the pathway scores as a table.
+
+```{r}
+res$example_1$ensemble
+```
+
+### Plot results
+
+The *iPAS_bar* function creates a bar plot of the top scoring pathways for
+a sample. Here, bar height represents the empirical p-value (negative log10
+transformed, so higher is more significant) and the color represents the
+z-score. The dotted line shows the cutoff for significance at a p<0.05 level.
+
+```{r}
+iPAS_bar(res, experiment = 1, num_top = 15, fill = "z_score", bar_height = "neg_log10_p")
+```
+
+
+The *iPAS_heatmap* function creates a heatmap of pathway z-scores for each
+sample. The heatmap is clustered by rows (pathways) and columns (samples) so
+that a user can see which pathways score similarly across samples.
+
+```{r}
+iPAS_heatmap(res, pathway_names = "both", category = "Signaling")
+```
+
+The *iPAS_density* function shows the null distribution of pathway scores (or
+z-scores) for one sample. The score or z-score of the sample is shown by a red
+line, along with a p-value.
+
+The *iPAS_density_facet* function does the same for all samples at once.
+
+```{r}
+iPAS_density(res, path = "hsa04150", experiment = 1, score_type = "score")
+
+iPAS_density_facet(res, path = "hsa04150", score_type = "score")
+```
+
+
+

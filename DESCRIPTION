@@ -1,0 +1,29 @@
+Package: iPAS
+Type: Package
+Title: integrative Pathway Activity Signatures (iPAS)
+Version: 0.1.0
+Author: Nicholas Clark
+Maintainer: Nicholas Clark <nicholas.clark00@gmail.com>, Mario Medvedovic 
+        <medvedm@ucmail.uc.edu>
+Description: This package provides functions for calculating pathway scores
+    based on integrative Pathway Activity Signatures (iPAS). These signatures
+    were created using the LINCS L1000 differential expression dataset. We 
+    integrate data across twelve cell lines and use machine learning methods to
+    find genes whose expression consistently reacts to pathway perturbation.
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 3.5.0)
+LazyData: true
+Imports: 
+    magrittr,
+    dplyr,
+    roxygen2,
+    reshape2,
+    tibble,
+    parallel,
+    ggplot2,
+    forcats,
+    scico,
+    egg,
+    ComplexHeatmap
+RoxygenNote: 7.1.1

@@ -1,0 +1,5 @@
+url: https://nicholasclark.github.io/iPAS
+
+template:
+  params:
+    bootswatch: Flatly
